@@ -12,6 +12,7 @@ debug('loading ...');
 
 class File {
     constructor(filepath) {
+        this.File = File;
         this.path = misc.path.absolute(filepath);
         this.basename = path.basename(this.path);
         this.extname = path.extname(this.path);

@@ -17,4 +17,3 @@ function load(filepath) {
 debug('loaded!');
 
 module.exports = load;
-module.exports.File = File;

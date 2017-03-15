@@ -17,8 +17,8 @@ debug('loading ...');
 
 describe('load a file', () => {
     it('should return a File object with type FILE', (done) => {
-        file.should.be.an.instanceOf(load.File);
-        file.type.should.be.exactly(load.File.TYPE_FILE);
+        file.should.be.an.instanceOf(file.File);
+        file.type.should.be.exactly(file.File.TYPE_FILE);
         file.name.should.be.exactly('foo');
         file.basename.should.be.exactly('foo.js');
         file.extname.should.be.exactly('.js');
@@ -29,8 +29,8 @@ describe('load a file', () => {
 
 describe('load a directory', () => {
     it('should return a File object with type DIRECTORY', (done) => {
-        tree.should.be.an.instanceOf(load.File);
-        tree.type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        tree.should.be.an.instanceOf(file.File);
+        tree.type.should.be.exactly(file.File.TYPE_DIRECTORY);
         tree.name.should.be.exactly('bar');
         tree.files.should.be.an.instanceOf(Map).with.property('size', 5);
         done();
@@ -38,8 +38,8 @@ describe('load a directory', () => {
 
     it('should read sub directories recursively', (done) => {
         const treed = tree.files.get('d');
-        treed.should.be.an.instanceOf(load.File);
-        treed.type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        treed.should.be.an.instanceOf(file.File);
+        treed.type.should.be.exactly(file.File.TYPE_DIRECTORY);
         treed.name.should.be.exactly('d');
         treed.files.should.be.an.instanceOf(Map).with.property('size', 3);
         done();
@@ -48,12 +48,12 @@ describe('load a directory', () => {
 
 describe('method filter', () => {
     it('should return a new File object with filtered files', (done) => {
-        tree1.should.be.an.instanceOf(load.File);
-        tree1.type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        tree1.should.be.an.instanceOf(file.File);
+        tree1.type.should.be.exactly(file.File.TYPE_DIRECTORY);
         tree1.name.should.be.exactly('bar');
         tree1.files.should.be.an.instanceOf(Map).with.property('size', 2);
-        tree1.files.get('d').should.be.an.instanceOf(load.File);
-        tree1.files.get('d').type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        tree1.files.get('d').should.be.an.instanceOf(file.File);
+        tree1.files.get('d').type.should.be.exactly(file.File.TYPE_DIRECTORY);
         tree1.files.get('d').name.should.be.exactly('d');
         tree1.files.get('d').files.should.be.an.instanceOf(Map).with.property('size', 1);
         done();

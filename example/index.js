@@ -18,7 +18,7 @@ exports.file = file;
 exports.tree = tree;
 
 const jsfiles = [];
-const tree1 = tree.filter(file => file.type === load.File.TYPE_DIRECTORY || file.extname === '.js');
+const tree1 = tree.filter(file => file.type === file.File.TYPE_DIRECTORY || file.extname === '.js');
 tree1.each(file => jsfiles.push(file.path));
 
 exports.tree1 = tree1;
