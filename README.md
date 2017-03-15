@@ -27,7 +27,17 @@ directory => {
 
 ```
 
-Note that invisible files are ignored.
+# .filter() and .each()
+
+Apply handler for every file and directory in the target.
+
+```
+const dectory1 = directory.filter(file => file.type !== file.File.TYPE_DIRECTORY && file.name != ''a');
+```
+
+```
+directory.each(file => console.log(file.name));
+```
 
 [npm-image]: https://img.shields.io/npm/v/vi-directory-loader.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/vi-directory-loader
