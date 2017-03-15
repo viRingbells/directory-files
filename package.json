@@ -1,0 +1,36 @@
+{
+  "name": "vi-directory-loader",
+  "version": "1.0.0",
+  "description": "A loader to load files under a certain directory",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/eslint index.js example/** source/** && ./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --require should --recursive test",
+    "debug": "node --inspect-brk=9229 example/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/viRingbells/vi-directory-loader.git"
+  },
+  "keywords": [
+    "files",
+    "directory",
+    "loader",
+    "load"
+  ],
+  "author": "Sun Haohao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/viRingbells/vi-directory-loader/issues"
+  },
+  "homepage": "https://github.com/viRingbells/vi-directory-loader#readme",
+  "devDependencies": {
+    "eslint": "^3.17.1",
+    "eslint-config-google": "^0.7.1",
+    "istanbul": "^0.4.5",
+    "mocha": "^3.2.0",
+    "should": "^11.2.1"
+  },
+  "dependencies": {
+    "vi-misc": "^1.0.0"
+  }
+}
