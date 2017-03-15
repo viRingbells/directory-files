@@ -10,6 +10,8 @@ const path    = require('path');
 const load    = require('..');
 const file    = require('../example').file;
 const tree    = require('../example').tree;
+const tree1   = require('../example').tree1;
+const jsfiles = require('../example').jsfiles;
 
 debug('loading ...');
 
@@ -35,11 +37,35 @@ describe('load a directory', () => {
     });
 
     it('should read sub directories recursively', (done) => {
-        const tree1 = tree.files.get('d');
+        const treed = tree.files.get('d');
+        treed.should.be.an.instanceOf(load.File);
+        treed.type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        treed.name.should.be.exactly('d');
+        treed.files.should.be.an.instanceOf(Map).with.property('size', 3);
+        done();
+    });
+});
+
+describe('method filter', () => {
+    it('should return a new File object with filtered files', (done) => {
         tree1.should.be.an.instanceOf(load.File);
         tree1.type.should.be.exactly(load.File.TYPE_DIRECTORY);
-        tree1.name.should.be.exactly('d');
-        tree1.files.should.be.an.instanceOf(Map).with.property('size', 3);
+        tree1.name.should.be.exactly('bar');
+        tree1.files.should.be.an.instanceOf(Map).with.property('size', 2);
+        tree1.files.get('d').should.be.an.instanceOf(load.File);
+        tree1.files.get('d').type.should.be.exactly(load.File.TYPE_DIRECTORY);
+        tree1.files.get('d').name.should.be.exactly('d');
+        tree1.files.get('d').files.should.be.an.instanceOf(Map).with.property('size', 1);
+        done();
+    });
+});
+
+describe('method each', () => {
+    it('should write each of path into jspath', (done) => {
+        jsfiles.should.be.an.instanceOf(Array).with.lengthOf(4);
+        for (const filepath of jsfiles) {
+            filepath.endsWith('.js').should.be.ok;
+        }
         done();
     });
 });
