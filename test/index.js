@@ -32,7 +32,7 @@ describe('load a directory', () => {
         tree.should.be.an.instanceOf(file.File);
         tree.type.should.be.exactly(file.File.TYPE_DIRECTORY);
         tree.name.should.be.exactly('bar');
-        tree.files.should.be.an.instanceOf(Map).with.property('size', 5);
+        tree.files.should.be.an.instanceOf(Map).with.property('size', 4);
         done();
     });
 
