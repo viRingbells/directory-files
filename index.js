@@ -10,10 +10,6 @@ const File      = require('./source/File');
 
 debug('loading ...');
 
-function load(filepath) {
-    return new File(filepath);    
-}
-
 debug('loaded!');
 
-module.exports = load;
+module.exports = File;

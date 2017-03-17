@@ -7,67 +7,77 @@ process.mainModule = module;
 
 const debug   = require('debug')('directory-loader.test.index');
 const path    = require('path');
-const load    = require('..');
-const file    = require('../example').file;
-const tree    = require('../example').tree;
-const tree1   = require('../example').tree1;
-const jsfiles = require('../example').jsfiles;
+const File    = require('..');
+const { foo, bar, jsFiles, barJs, getBarTree } = require('../example');
 
 debug('loading ...');
 
 describe('load a file', () => {
     it('should return a File object with type FILE', (done) => {
-        file.should.be.an.instanceOf(file.File);
-        file.type.should.be.exactly(file.File.TYPE_FILE);
-        file.name.should.be.exactly('foo');
-        file.basename.should.be.exactly('foo.js');
-        file.extname.should.be.exactly('.js');
-        path.isAbsolute(file.path).should.be.exactly(true);
+        foo.should.be.an.instanceOf(File);
+        foo.type.should.be.exactly(File.TYPE_FILE);
+        foo.name.should.be.exactly('foo');
+        foo.basename.should.be.exactly('foo.js');
+        foo.extname.should.be.exactly('.js');
+        path.isAbsolute(foo.path).should.be.exactly(true);
         done();
     });
 });
 
 describe('load a directory', () => {
     it('should return a File object with type DIRECTORY', (done) => {
-        tree.should.be.an.instanceOf(file.File);
-        tree.type.should.be.exactly(file.File.TYPE_DIRECTORY);
-        tree.name.should.be.exactly('bar');
-        tree.files.should.be.an.instanceOf(Map).with.property('size', 4);
+        bar.should.be.an.instanceOf(File);
+        bar.type.should.be.exactly(File.TYPE_DIRECTORY);
+        bar.name.should.be.exactly('bar');
+        bar.files.should.be.an.instanceOf(Map).with.property('size', 4);
         done();
     });
 
     it('should read sub directories recursively', (done) => {
-        const treed = tree.files.get('d');
-        treed.should.be.an.instanceOf(file.File);
-        treed.type.should.be.exactly(file.File.TYPE_DIRECTORY);
-        treed.name.should.be.exactly('d');
-        treed.files.should.be.an.instanceOf(Map).with.property('size', 3);
+        const barD = bar.files.get('d');
+        barD.should.be.an.instanceOf(File);
+        barD.type.should.be.exactly(File.TYPE_DIRECTORY);
+        barD.name.should.be.exactly('d');
+        barD.files.should.be.an.instanceOf(Map).with.property('size', 3);
         done();
     });
 });
 
 describe('method filter', () => {
     it('should return a new File object with filtered files', (done) => {
-        tree1.should.be.an.instanceOf(file.File);
-        tree1.type.should.be.exactly(file.File.TYPE_DIRECTORY);
-        tree1.name.should.be.exactly('bar');
-        tree1.files.should.be.an.instanceOf(Map).with.property('size', 2);
-        tree1.files.get('d').should.be.an.instanceOf(file.File);
-        tree1.files.get('d').type.should.be.exactly(file.File.TYPE_DIRECTORY);
-        tree1.files.get('d').name.should.be.exactly('d');
-        tree1.files.get('d').files.should.be.an.instanceOf(Map).with.property('size', 1);
+        barJs.should.be.an.instanceOf(File);
+        barJs.type.should.be.exactly(File.TYPE_DIRECTORY);
+        barJs.name.should.be.exactly('bar');
+        barJs.files.should.be.an.instanceOf(Map).with.property('size', 2);
+        barJs.files.get('d').should.be.an.instanceOf(File);
+        barJs.files.get('d').type.should.be.exactly(File.TYPE_DIRECTORY);
+        barJs.files.get('d').name.should.be.exactly('d');
+        barJs.files.get('d').files.should.be.an.instanceOf(Map).with.property('size', 1);
         done();
     });
 });
 
 describe('method each', () => {
     it('should write each of path into jspath', (done) => {
-        jsfiles.should.be.an.instanceOf(Array).with.lengthOf(4);
-        for (const filepath of jsfiles) {
+        jsFiles.should.be.an.instanceOf(Array).with.lengthOf(2);
+        for (const filepath of jsFiles) {
             filepath.endsWith('.js').should.be.ok;
         }
         done();
     });
+});
+
+describe('method toTree', () => {
+    it('should read all files content', () => (async () => {
+        const tree = await getBarTree();
+        tree.should.be.an.instanceOf(Map).with.property('size', 4);
+        tree.get('d').should.be.an.instanceOf(Map).with.property('size', 3);
+    })());
+    it('should set file path as value by default', () => (async () => {
+        const rawTree = await bar.toTree();
+        rawTree.should.be.an.instanceOf(Map).with.property('size', 4);
+        path.isAbsolute(rawTree.get('a.js')).should.be.ok;
+    })());
 });
 
 debug('loaded!');
