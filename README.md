@@ -38,6 +38,25 @@ const dectory1 = directory.filter(file => file.type !== file.File.TYPE_DIRECTORY
 ```
 directory.each(file => console.log(file.name));
 ```
+# .toTree()
+
+Map all files into a tree, file name as the key and path (by default) as the value
+
+```
+const tree = directory.toTree();
+
+/*
+directory => {
+    'a': 'xxx',
+    'b': 'xxx',
+    'c': Map{
+        'd': 'xxx',
+        'e': 'xxx',
+        ...
+    }
+}
+*/
+```
 
 [npm-image]: https://img.shields.io/npm/v/vi-directory-loader.svg?style=flat-square
 [npm-url]: https://www.npmjs.com/package/vi-directory-loader
