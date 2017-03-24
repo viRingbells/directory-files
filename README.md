@@ -1,66 +1,138 @@
-# vi-directory-loader
+# directory-files
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
 [![Test coverage][coveralls-image]][coveralls-url]
 
-A tool to find all files under a certain directory. The scan result files are organized in a tree just as they are in file system.
+Handle all files under a given directory
 
 # usage
 
 ```
-const load = require('vi-directory-loader');
+const DirectoryFiles = require('directory-files');
 
-const directory = load('./foo');
+const dir = new DirectoryFiles('file/path');
 
 /*
-directory => {
-    'name': 'foo',
-    'type': 'DIRECTORY',
-    'files': Map{
-        'a': { 'name': 'a', ...},
-        'b': { 'name': 'b', ...},
-        ...
+dir => {
+    'path': '/absolute/file/path',
+    'children': Map{
+        'a.js': "/absolute/file/path/a.js,
+        'b': DirectoryFiles{
+            'path': '/absolute/file/path/b',
+            children: Map{
+                'c.js': "/absolute/file/path/b/c.js"
+            }
+         }
     }
 }
 */
 
 ```
 
-# .filter() and .each()
+# .each()
 
-Apply handler for every file and directory in the target.
-
-```
-const dectory1 = directory.filter(file => file.type !== file.File.TYPE_DIRECTORY && file.name != ''a');
-```
+Handle each file
 
 ```
-directory.each(file => console.log(file.name));
+dir.each(filepath => console.log(filepath));
 ```
-# .toTree()
 
-Map all files into a tree, file name as the key and path (by default) as the value
+# .map()
+Map values
 
 ```
-const tree = directory.toTree();
+let dir1 = dir.map(filepath => path.relative(dir1.path, filepath).split('/').join('.'));
 
 /*
-directory => {
-    'a': 'xxx',
-    'b': 'xxx',
-    'c': Map{
-        'd': 'xxx',
-        'e': 'xxx',
-        ...
+dir => {
+    'path': '/absolute/file/path',
+    'children': Map{
+        'a.js': "/absolute/file/path/a.js,
+        'b': DirectoryFiles{
+            'path': '/absolute/file/path/b',
+            children: Map{
+                'c.js': "/absolute/file/path/b/c.js"
+            }
+         }
+    }
+}
+*/
+
+```
+
+# .mapkeys()
+Change keyname
+
+```
+let dir2 = dir.mapkeys(key => path.basename(key, path.extname(key)));
+
+/*
+dir => {
+    'path': '/absolute/file/path',
+    'children': Map{
+        'a': "/absolute/file/path/a.js,
+        'b': DirectoryFiles{
+            'path': '/absolute/file/path/b',
+            children: Map{
+                'c': "/absolute/file/path/b/c.js"
+            }
+         }
+    }
+}
+*/
+
+```
+
+# .filter()
+filter files
+
+```
+let dir3 = dir.filter((file, key) => key !== 'a.js');
+
+/*
+dir => {
+    'path': '/absolute/file/path',
+    'children': Map{
+        'b': DirectoryFiles{
+            'path': '/absolute/file/path/b',
+            children: Map{
+                'c': "/absolute/file/path/b/c.js"
+            }
+         }
+    }
+}
+*/
+
+```
+
+# .filterDirectory()
+filter directories
+
+```
+let dir4 = dir.filterDirectory((dir, key) => dir.children.size !== 0);
+```
+
+# .toObject()
+parse into an object
+
+```
+let obj = dir.toObject();
+
+/*
+obj => {
+    'a.js': "/absolute/file/path/a.js,
+    'b': {
+        'c.js': "/absolute/file/path/b/c.js"
     }
 }
 */
 ```
 
-[npm-image]: https://img.shields.io/npm/v/vi-directory-loader.svg?style=flat-square
-[npm-url]: https://www.npmjs.com/package/vi-directory-loader
-[travis-image]: https://img.shields.io/travis/viRingbells/vi-directory-loader/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/viRingbells/vi-directory-loader
-[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/vi-directory-loader.svg?style=flat-square
-[coveralls-url]: https://codecov.io/github/viRingbells/vi-directory-loader?branch=master
+
+[npm-image]: https://img.shields.io/npm/v/directory-files.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/directory-files
+[travis-image]: https://img.shields.io/travis/viRingbells/directory-files/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/viRingbells/directory-files
+[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/directory-files.svg?style=flat-square
+[coveralls-url]: https://codecov.io/github/viRingbells/directory-files?branch=master
