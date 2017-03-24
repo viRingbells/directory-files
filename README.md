@@ -1,4 +1,4 @@
-# directory-files
+# DirectoryFiles
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -9,7 +9,7 @@ Handle all files under a given directory
 # usage
 
 ```
-const DirectoryFiles = require('directory-files');
+const DirectoryFiles = require('DirectoryFiles');
 
 const dir = new DirectoryFiles('file/path');
 
@@ -130,9 +130,9 @@ obj => {
 ```
 
 
-[npm-image]: https://img.shields.io/npm/v/directory-files.svg?style=flat-square
-[npm-url]: https://www.npmjs.com/package/directory-files
-[travis-image]: https://img.shields.io/travis/viRingbells/directory-files/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/viRingbells/directory-files
-[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/directory-files.svg?style=flat-square
-[coveralls-url]: https://codecov.io/github/viRingbells/directory-files?branch=master
+[npm-image]: https://img.shields.io/npm/v/DirectoryFiles.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/DirectoryFiles
+[travis-image]: https://img.shields.io/travis/viRingbells/DirectoryFiles/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/viRingbells/DirectoryFiles
+[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/DirectoryFiles.svg?style=flat-square
+[coveralls-url]: https://codecov.io/github/viRingbells/DirectoryFiles?branch=master
