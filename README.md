@@ -1,4 +1,4 @@
-# DirectoryFiles
+# directoryfiles
 
 [![NPM version][npm-image]][npm-url]
 [![build status][travis-image]][travis-url]
@@ -9,16 +9,16 @@ Handle all files under a given directory
 # usage
 
 ```
-const DirectoryFiles = require('DirectoryFiles');
+const directoryfiles = require('directoryfiles');
 
-const dir = new DirectoryFiles('file/path');
+const dir = new directoryfiles('file/path');
 
 /*
 dir => {
     'path': '/absolute/file/path',
     'children': Map{
         'a.js': "/absolute/file/path/a.js,
-        'b': DirectoryFiles{
+        'b': directoryfiles{
             'path': '/absolute/file/path/b',
             children: Map{
                 'c.js': "/absolute/file/path/b/c.js"
@@ -49,7 +49,7 @@ dir => {
     'path': '/absolute/file/path',
     'children': Map{
         'a.js': "/absolute/file/path/a.js,
-        'b': DirectoryFiles{
+        'b': directoryfiles{
             'path': '/absolute/file/path/b',
             children: Map{
                 'c.js': "/absolute/file/path/b/c.js"
@@ -72,7 +72,7 @@ dir => {
     'path': '/absolute/file/path',
     'children': Map{
         'a': "/absolute/file/path/a.js,
-        'b': DirectoryFiles{
+        'b': directoryfiles{
             'path': '/absolute/file/path/b',
             children: Map{
                 'c': "/absolute/file/path/b/c.js"
@@ -94,7 +94,7 @@ let dir3 = dir.filter((file, key) => key !== 'a.js');
 dir => {
     'path': '/absolute/file/path',
     'children': Map{
-        'b': DirectoryFiles{
+        'b': directoryfiles{
             'path': '/absolute/file/path/b',
             children: Map{
                 'c': "/absolute/file/path/b/c.js"
@@ -130,9 +130,9 @@ obj => {
 ```
 
 
-[npm-image]: https://img.shields.io/npm/v/DirectoryFiles.svg?style=flat-square
-[npm-url]: https://www.npmjs.com/package/DirectoryFiles
-[travis-image]: https://img.shields.io/travis/viRingbells/DirectoryFiles/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/viRingbells/DirectoryFiles
-[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/DirectoryFiles.svg?style=flat-square
-[coveralls-url]: https://codecov.io/github/viRingbells/DirectoryFiles?branch=master
+[npm-image]: https://img.shields.io/npm/v/directoryfiles.svg?style=flat-square
+[npm-url]: https://www.npmjs.com/package/directoryfiles
+[travis-image]: https://img.shields.io/travis/viRingbells/directoryfiles/master.svg?style=flat-square
+[travis-url]: https://travis-ci.org/viRingbells/directoryfiles
+[coveralls-image]: https://img.shields.io/codecov/c/github/viRingbells/directoryfiles.svg?style=flat-square
+[coveralls-url]: https://codecov.io/github/viRingbells/directoryfiles?branch=master
