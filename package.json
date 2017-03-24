@@ -1,5 +1,5 @@
 {
-  "name": "directory-files",
+  "name": "DirectoryFiles",
   "version": "1.0.0",
   "description": "To find and process all files under a directory",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/viRingbells/directory-files.git"
+    "url": "git+https://github.com/viRingbells/DirectoryFiles.git"
   },
   "keywords": [
     "files",
@@ -20,9 +20,9 @@
   "author": "Sun Haohao",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/viRingbells/directory-files/issues"
+    "url": "https://github.com/viRingbells/DirectoryFiles/issues"
   },
-  "homepage": "https://github.com/viRingbells/directory-files#readme",
+  "homepage": "https://github.com/viRingbells/DirectoryFiles#readme",
   "devDependencies": {
     "eslint": "^3.17.1",
     "istanbul": "^1.1.0-alpha.1",

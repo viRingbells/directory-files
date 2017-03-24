@@ -43,7 +43,9 @@ class DirectoryFiles {
             let key = filename;
             let content = file;
             if (file instanceof DirectoryFiles) {
-                content = file.iterate(handler);
+                let result = handler(file, key);
+                key = result.key;
+                (key !== null) && (content = file.iterate(handler));
             }
             else {
                 let result = handler(file, filename);
@@ -61,28 +63,35 @@ class DirectoryFiles {
 
     each(handler) {
         return this.iterate((file, key) => {
-            handler(file);
+            (file instanceof DirectoryFiles) || handler(file);
             return { key, file };
         });
     }
 
     map(handler) {
         return this.iterate((file, key) => {
-            file = handler(file, key);
+            (file instanceof DirectoryFiles) || (file = handler(file, key));
             return { key, file };
         });
     }
 
     mapkeys(handler) {
         return this.iterate((file, key) => {
-            key = handler(key, file);
+            (file instanceof DirectoryFiles) || (key = handler(key, file));
             return { key, file };
         });
     }
 
     filter(handler) {
         return this.iterate((file, key) => {
-            key = handler(key, file) === false ? null : key;
+            (file instanceof DirectoryFiles) || (key = handler(key, file) === false ? null : key);
+            return { key, file };
+        });
+    }
+
+    filterDirectory(handler) {
+        return this.iterate((file, key) => {
+            (file instanceof DirectoryFiles) && (key = handler(file, key));
             return { key, file };
         });
     }

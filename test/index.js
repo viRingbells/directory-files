@@ -38,6 +38,14 @@ describe('filter files', () => {
     });
 });
 
+describe('filter directories', () => {
+    it('should return a new instance with directory filtered', (done) => {
+        const c4 = dir.filterDirectory(file => file.children.size > 3);
+        should(c4.children.has('d')).be.exactly(false);
+        done();
+    });
+});
+
 describe('mapping keys', () => {
     it('should rename files in property children', (done) => {
         const rename = dir.mapkeys(key => path.basename(key, path.extname(key)).toUpperCase());
