@@ -5,79 +5,64 @@
 
 process.mainModule = module;
 
-const debug   = require('debug')('directory-loader.test.index');
-const path    = require('path');
-const File    = require('..');
-const { foo, bar, jsFiles, barJs, getBarTree } = require('../example');
+const path              = require('path');
+const should            = require('should');
+const DirectoryFiles    = require('..');
+const { dir, js, yaml } = require('../example');
 
-debug('loading ...');
-
-describe('load a file', () => {
-    it('should return a File object with type FILE', (done) => {
-        foo.should.be.an.instanceOf(File);
-        foo.type.should.be.exactly(File.TYPE_FILE);
-        foo.name.should.be.exactly('foo');
-        foo.basename.should.be.exactly('foo.js');
-        foo.extname.should.be.exactly('.js');
-        path.isAbsolute(foo.path).should.be.exactly(true);
+describe('create an instance of DirectoryFiles', () => {
+    it('should return a instance with the files record in its property "children"', (done) => {
+        dir.should.be.an.instanceof(DirectoryFiles);
+        dir.should.have.property('path');
+        dir.path.should.be.a.String;
+        path.isAbsolute(dir.path).should.be.exactly(true);
+        dir.children.should.be.an.instanceof(Map).with.property('size', 4);
+        dir.children.get('d').should.be.an.instanceof(DirectoryFiles);
+        dir.children.get('d').children.should.have.property('size', 3);
         done();
     });
 });
 
-describe('load a directory', () => {
-    it('should return a File object with type DIRECTORY', (done) => {
-        bar.should.be.an.instanceOf(File);
-        bar.type.should.be.exactly(File.TYPE_DIRECTORY);
-        bar.name.should.be.exactly('bar');
-        bar.files.should.be.an.instanceOf(Map).with.property('size', 4);
-        done();
-    });
-
-    it('should read sub directories recursively', (done) => {
-        const barD = bar.files.get('d');
-        barD.should.be.an.instanceOf(File);
-        barD.type.should.be.exactly(File.TYPE_DIRECTORY);
-        barD.name.should.be.exactly('d');
-        barD.files.should.be.an.instanceOf(Map).with.property('size', 3);
+describe('filter files', () => {
+    it('should return a new instance with files filtered', (done) => {
+        const js = dir.filter(path => path.endsWith('.js'));
+        js.should.be.an.instanceof(DirectoryFiles);
+        js.should.not.be.exactly(dir);
+        js.children.size.should.be.exactly(2);
+        js.children.get('a.js').should.be.ok;
+        should(js.children.get('b.json')).not.be.ok;
+        js.children.get('d').children.size.should.be.exactly(1);
+        js.children.get('d').children.get('e.js').should.be.ok;
+        should(js.children.get('d').children.get('h.yaml')).not.be.ok;
         done();
     });
 });
 
-describe('method filter', () => {
-    it('should return a new File object with filtered files', (done) => {
-        barJs.should.be.an.instanceOf(File);
-        barJs.type.should.be.exactly(File.TYPE_DIRECTORY);
-        barJs.name.should.be.exactly('bar');
-        barJs.files.should.be.an.instanceOf(Map).with.property('size', 2);
-        barJs.files.get('d').should.be.an.instanceOf(File);
-        barJs.files.get('d').type.should.be.exactly(File.TYPE_DIRECTORY);
-        barJs.files.get('d').name.should.be.exactly('d');
-        barJs.files.get('d').files.should.be.an.instanceOf(Map).with.property('size', 1);
+describe('mapping keys', () => {
+    it('should rename files in property children', (done) => {
+        const rename = dir.mapkeys(key => path.basename(key, path.extname(key)).toUpperCase());
+        should(rename.children.get('a.js')).not.be.ok;
+        rename.children.get('A').should.be.ok;
+        should(rename.children.get('d').children.get('f.yaml')).not.be.ok;
+        rename.children.get('d').children.get('F').should.be.ok;
         done();
     });
 });
 
-describe('method each', () => {
-    it('should write each of path into jspath', (done) => {
-        jsFiles.should.be.an.instanceOf(Array).with.lengthOf(2);
-        for (const filepath of jsFiles) {
-            filepath.endsWith('.js').should.be.ok;
-        }
+describe('mapping content', () => {
+    it('should map contents with handler', (done) => {
+        const map = dir.map(filepath => path.relative(dir.path, filepath));
+        map.children.get('a.js').should.be.exactly('a.js');
+        map.children.get('d').children.get('e.js').should.be.exactly('d/e.js');
         done();
     });
 });
 
-describe('method toTree', () => {
-    it('should read all files content', () => (async () => {
-        const tree = await getBarTree();
-        tree.should.be.an.instanceOf(Map).with.property('size', 4);
-        tree.get('d').should.be.an.instanceOf(Map).with.property('size', 3);
-    })());
-    it('should set file path as value by default', () => (async () => {
-        const rawTree = await bar.toTree();
-        rawTree.should.be.an.instanceOf(Map).with.property('size', 4);
-        path.isAbsolute(rawTree.get('a.js')).should.be.ok;
-    })());
+describe('each file', () => {
+    it('should handle each file', (done) => {
+        const paths = [];
+        dir.each(path => paths.push(path));
+        paths.length.should.be.exactly(6);
+        done();
+    });
 });
-
-debug('loaded!');

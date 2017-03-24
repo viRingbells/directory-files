@@ -5,26 +5,22 @@
 
 process.mainModule = module;
 
-const debug   = require('debug')('directory-loader.example.index');
-const fs      = require('fs');
-const File    = require('..');
+const fs              = require('fs');
+const path            = require('path');
+const DirectoryFiles  = require('..');
 
-debug('loading ...');
+const dir = new DirectoryFiles('foo');
 
-const foo = new File('./foo.js');
-const bar = new File('./bar');
+const js = dir.filter(path => path.endsWith('.js') || path.endsWith('.json'))
+              .map(path => require(path))
+              .mapkeys(key => path.basename(key, path.extname(key)))
+              .toObject();
 
-const jsFiles = [];
-const barJs = bar.filterFile(file => file.extname === '.js');
+const yaml = dir.filter(path => path.endsWith('.yaml') || path.endsWith('yml'))
+                .map(path => fs.readFileSync(path).toString())
+                .mapkeys(key => path.basename(key, path.extname(key)))
+                .toObject();
 
-barJs.eachFile(file => jsFiles.push(file.path));
+js.d.e();
 
-function getBarTree () {
-    return bar.toTree((file) => new Promise((resolve) => {
-        fs.readFile(file.path, (err, data) => resolve(data.toString().trim()));
-    }));
-}
-
-debug('loaded!');
-
-module.exports = { foo, bar, jsFiles, barJs, getBarTree };
+module.exports = { dir, js, yaml };
