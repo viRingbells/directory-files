@@ -1,6 +1,6 @@
 {
   "name": "directoryfiles",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "To find and process all files under a directory",
   "main": "index.js",
   "scripts": {

@@ -63,7 +63,7 @@ class DirectoryFiles {
 
     each(handler) {
         return this.iterate((file, key) => {
-            (file instanceof DirectoryFiles) || handler(file);
+            (file instanceof DirectoryFiles) || handler(file, key);
             return { key, file };
         });
     }
