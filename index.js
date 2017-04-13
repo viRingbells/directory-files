@@ -84,7 +84,7 @@ class DirectoryFiles {
 
     filter(handler) {
         return this.iterate((file, key) => {
-            (file instanceof DirectoryFiles) || (key = handler(key, file) === false ? null : key);
+            (file instanceof DirectoryFiles) || (key = handler(file, key) === false ? null : key);
             return { key, file };
         });
     }
