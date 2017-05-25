@@ -3,21 +3,47 @@
 const assert  = require('assert');
 const fs      = require('fs');
 const path    = require('path');
+const thenify = require('thenify');
+
+fs.statAsync    = thenify(fs.stat);
+fs.readdirAsync = thenify(fs.readdir);
 
 const misc    = require('vi-misc');
 
 class DirectoryFiles {
 
-    constructor(directoryPath) {
+    constructor(directoryPath, async = false) {
         this.children = new Map();
         this.path = misc.path.absolute(directoryPath);
-        assert(fs.statSync(this.path).isDirectory(), 'Path should be a directory');
+        !async && this.loadAsync();
+    }
+
+    loadAsync() {
+        let stat = fs.statSync(this.path);
+        assert(stat.isDirectory(), 'Path should be a directory');
 
         const files = fs.readdirSync(this.path);
         for (let file of files) {
             let result = path.join(this.path, file);
-            if (fs.statSync(result).isDirectory()) {
+            let stat = fs.statSync(result);
+            if (stat.isDirectory()) {
                 result = new DirectoryFiles(result);
+            }
+            this.children.set(file, result);
+        }
+    }
+
+    async load() {
+        let stat = await fs.statAsync(this.path);
+        assert(stat.isDirectory(), 'Path should be a directory');
+
+        const files = await fs.readdirAsync(this.path);
+        for (let file of files) {
+            let result = path.join(this.path, file);
+            let stat = await fs.statAsync(result);
+            if (stat.isDirectory()) {
+                result = new DirectoryFiles(result, true);
+                await result.load();
             }
             this.children.set(file, result);
         }

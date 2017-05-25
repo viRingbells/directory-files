@@ -74,3 +74,42 @@ describe('each file', () => {
         done();
     });
 });
+
+describe('async load', () => {
+    it('should return a instance with the files record in its property "children"', async () => {
+        const dir = new DirectoryFiles('../example/foo', true);
+        await dir.load();
+        dir.should.be.an.instanceof(DirectoryFiles);
+        dir.should.have.property('path');
+        dir.path.should.be.a.String;
+        path.isAbsolute(dir.path).should.be.exactly(true);
+        dir.children.should.be.an.instanceof(Map).with.property('size', 4);
+        dir.children.get('d').should.be.an.instanceof(DirectoryFiles);
+        dir.children.get('d').children.should.have.property('size', 3);
+    });
+});
+
+describe('load wrong file', () => {
+    it('should not throw in sync mode', async () => {
+        let error = {};
+        let dir = null;
+        try {
+            dir = new DirectoryFiles('../example/foo222');
+        }
+        catch (e) {
+            error = e;
+        }
+        error.should.be.an.instanceof(Error);
+    });
+    it('should not throw in async mode', async () => {
+        let error = {};
+        try {
+            const dir = new DirectoryFiles('../example/foo222', true);
+            await dir.load();
+        }
+        catch (e) {
+            error = e;
+        }
+        error.should.be.an.instanceof(Error);
+    });
+});
