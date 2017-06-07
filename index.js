@@ -15,10 +15,10 @@ class DirectoryFiles {
     constructor(directoryPath, async = false) {
         this.children = new Map();
         this.path = misc.path.absolute(directoryPath);
-        !async && this.loadAsync();
+        !async && this.loadSync();
     }
 
-    loadAsync() {
+    loadSync() {
         let stat = fs.statSync(this.path);
         assert(stat.isDirectory(), 'Path should be a directory');
 
@@ -38,15 +38,17 @@ class DirectoryFiles {
         assert(stat.isDirectory(), 'Path should be a directory');
 
         const files = await fs.readdirAsync(this.path);
+        let works = [];
         for (let file of files) {
             let result = path.join(this.path, file);
             let stat = await fs.statAsync(result);
             if (stat.isDirectory()) {
                 result = new DirectoryFiles(result, true);
-                await result.load();
+                works.push(result.load());
             }
             this.children.set(file, result);
         }
+        await Promise.all(works);
     }
 
     toObject() {
