@@ -5,7 +5,6 @@
 'use strict';
 
 const assert    = require('assert');
-const bluebird  = require('bluebird');
 const clone     = require('clone');
 const debug     = require('debug')('directoryfiles.index');
 const fs        = require('fs');
@@ -13,7 +12,7 @@ const misc      = require('vi-misc');
 const path      = require('path');
 
 debug('promisify native apis');
-bluebird.promisifyAll(fs);
+misc.promisify.all(fs);
 
 class DirectoryFiles {
 

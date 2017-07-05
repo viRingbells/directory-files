@@ -34,8 +34,7 @@
     "should": "^11.2.1"
   },
   "dependencies": {
-    "bluebird": "^3.5.0",
     "clone": "^2.1.1",
-    "vi-misc": "^1.7.0"
+    "vi-misc": "^1.8.0"
   }
 }
