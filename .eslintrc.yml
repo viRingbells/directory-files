@@ -17,3 +17,27 @@ rules:
   semi:
     - error
     - always
+  spellcheck/spell-checker:
+    - 1
+    - 
+      comments: true
+      strings: true
+      identifiers: true
+      lang: en_US
+      skipWords:
+        - apis
+        - async
+        - directoryfiles
+        - fs
+        - extname
+        - basename
+        - readdir
+        - js
+        - json
+        - param
+        - promisify
+        - stringify
+        - yaml
+        - yml
+plugins:
+  - spellcheck

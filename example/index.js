@@ -7,20 +7,24 @@ process.mainModule = module;
 
 const fs              = require('fs');
 const path            = require('path');
-const DirectoryFiles  = require('..');
+const DirectoryFiles  = require('directoryfiles');
 
-const dir = new DirectoryFiles('foo');
+async function main() {
+    const directory = new DirectoryFiles();
+    await directory.load();
+    await directory.load('foo');
+    const js = directory
+        .filter(path => path.endsWith('.js') || path.endsWith('.json'))
+        .map(path => require(path))
+        .mapKeys(key => path.basename(key, path.extname(key)))
+        .toObject();
 
-const js = dir.filter(path => path.endsWith('.js') || path.endsWith('.json'))
-              .map(path => require(path))
-              .mapkeys(key => path.basename(key, path.extname(key)))
-              .toObject();
+    const yaml = directory.filter(path => path.endsWith('.yaml') || path.endsWith('yml'))
+         .map(path => fs.readFileSync(path).toString())
+         .mapKeys(key => path.basename(key, path.extname(key)))
+         .toObject();
+    
+    return [directory, js, yaml];
+}
 
-const yaml = dir.filter(path => path.endsWith('.yaml') || path.endsWith('yml'))
-                .map(path => fs.readFileSync(path).toString())
-                .mapkeys(key => path.basename(key, path.extname(key)))
-                .toObject();
-
-js.d.e();
-
-module.exports = { dir, js, yaml };
+module.exports = main;
