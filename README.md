@@ -11,7 +11,11 @@ Handle all files under a given directory
 ```
 const directoryfiles = require('directoryfiles');
 
-const dir = new directoryfiles('file/path');
+const dir = new directoryfiles();
+
+dir.load('path/to/a/directory').then(() => {
+    console.log(dir);
+});
 
 /*
 dir => {
@@ -61,11 +65,11 @@ dir => {
 
 ```
 
-# .mapkeys()
+# .mapKeys()
 Change keyname
 
 ```
-let dir2 = dir.mapkeys(key => path.basename(key, path.extname(key)));
+let dir2 = dir.mapKeys(key => path.basename(key, path.extname(key)));
 
 /*
 dir => {
