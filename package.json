@@ -36,7 +36,6 @@
   "dependencies": {
     "bluebird": "^3.5.0",
     "clone": "^2.1.1",
-    "thenify": "^3.3.0",
     "vi-misc": "^1.7.0"
   }
 }
