@@ -76,6 +76,9 @@ class Descriptor {
         const file_list = await fs.readdirAsync(this.path);
         this.files = {};
         for (const file_path of file_list) {
+            if (file_path.startsWith('.')) {
+                continue;
+            }
             const sub_file = new Descriptor(file_path, this.path);
             await sub_file.ready();
             this.files[file_path] = sub_file;
