@@ -27,15 +27,16 @@ rules:
       skipWords:
         - apis
         - async
-        - directoryfiles
-        - fs
-        - extname
         - basename
-        - readdir
+        - directoryfiles
+        - extname
+        - fs
+        - init
         - js
         - json
         - param
         - promisify
+        - readdir
         - stringify
         - yaml
         - yml

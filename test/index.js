@@ -5,116 +5,80 @@
 
 process.mainModule = module;
 
-const path              = require('path');
-const should            = require('should');
-const DirectoryFiles    = require('directoryfiles');
-const example           = require('directoryfiles/example');
+const misc        = require('vi-misc');
+const should      = require('should');
+const Descriptor  = require('directoryfiles');
 
-describe('instance of DirectoryFiles', () => {
-    let directory, js, yaml;
-    before(async () => {
-        [directory, js, yaml] = await example();
+
+describe('common use', () => {
+    let descriptor = null;
+
+    it('should be ok newing a descriptor on a directory', async () => {
+        descriptor = new Descriptor('directory');
+        await descriptor.ready();
+        descriptor.should.have.property('stats');
+        descriptor.stats.isDirectory().should.be.exactly(true);
     });
 
-    it('should have files record in its property "children"', async () => {
-        directory.should.be.an.instanceof(DirectoryFiles);
-        directory.should.have.property('path');
-        directory.path.should.be.a.String;
-        path.isAbsolute(directory.path).should.be.exactly(true);
-        directory.children.should.be.an.instanceof(Map).with.property('size', 4);
-        directory.children.get('d').should.be.an.instanceof(DirectoryFiles);
-        directory.children.get('d').children.should.have.property('size', 3);
-
-        js.d.e.should.be.an.instanceof(Function);
-        js.d.e().should.be.exactly('This is e.js');
+    it('should have property files as the files in the directory', async () => {
+        descriptor.should.have.property('files');
+        descriptor.files.should.be.an.instanceOf(Object);
+        const keys = Object.keys(descriptor.files);
+        keys.length.should.be.exactly(4);
+        for (const name of ['file.txt', 'js_file.js', 'somesocket', 'sub_dir']) {
+            keys.includes(name).should.be.ok;
+            descriptor.files[name].should.be.an.instanceOf(Descriptor);
+        }
+        for (const file_name of ['file.txt', 'js_file.js', 'somesocket']) {
+            descriptor.files[file_name].stats.isFile().should.be.ok;
+        }
+        descriptor.files.sub_dir.stats.isDirectory().should.be.ok;
     });
 
-    it('should return a new instance with files filtered with method filter', async () => {
-        const js = directory.filter(path => path.endsWith('.js'));
-        js.should.be.an.instanceof(DirectoryFiles);
-        js.should.not.be.exactly(directory);
-        js.children.size.should.be.exactly(2);
-        js.children.get('a.js').should.be.ok;
-        should(js.children.get('b.json')).not.be.ok;
-        js.children.get('d').children.size.should.be.exactly(1);
-        js.children.get('d').children.get('e.js').should.be.ok;
-        should(js.children.get('d').children.get('h.yaml')).not.be.ok;
+    it('should return a directory tree', async () => {
+        const tree = descriptor.tree;
+        tree.should.be.an.instanceOf(Object);
+        tree.should.containDeep({
+            'file.txt': misc.path.absolute('directory/file.txt'),
+            'js_file.js': misc.path.absolute('directory/js_file.js'),
+            'somesocket': misc.path.absolute('directory/somesocket'),
+            'sub_dir': {
+                'sub_2_dir': {
+                    'a.txt': misc.path.absolute('directory/sub_dir/sub_2_dir/a.txt'),
+                    'b.txt': misc.path.absolute('directory/sub_dir/sub_2_dir/b.txt'),
+                },
+                'sub_dir_file.txt': misc.path.absolute('directory/sub_dir/sub_dir_file.txt'),
+                'sub_dir_file_2.txt': misc.path.absolute('directory/sub_dir/sub_dir_file_2.txt'),
+            },
+        });
     });
-
-    it('should return a new instance with directory filtered with method filterDirectory', async () => {
-        const c4 = directory.filterDirectory(file => file.children.size > 3);
-        should(c4.children.has('d')).be.exactly(false);
-    });
-
-    it('should rename files in property children with method mapKeys', async () => {
-        const rename = directory.mapKeys(key => path.basename(key, path.extname(key)).toUpperCase());
-        should(rename.children.get('a.js')).not.be.ok;
-        rename.children.get('A').should.be.ok;
-        should(rename.children.get('d').children.get('f.yaml')).not.be.ok;
-        rename.children.get('d').children.get('F').should.be.ok;
-    });
-
-    it('should map contents with handler with method map', async () => {
-        const map = directory.map(filePath => path.relative(directory.path, filePath));
-        map.children.get('a.js').should.be.exactly('a.js');
-        map.children.get('d').children.get('e.js').should.be.exactly('d/e.js');
-    });
-
-    it('should handle each file with method each', async () => {
-        const paths = [];
-        directory.each(path => paths.push(path));
-        paths.length.should.be.exactly(6);
-    });
-
-    it('should map directories', async () => {
-        const map = directory.mapDirectory(subDirectory => subDirectory.path);
-        map.should.have.property('children').which.is.an.instanceof(Map);
-        map.children.size.should.be.exactly(4);
-        map.children.has('d').should.be.ok;
-        map.children.get('d').should.be.an.instanceof(String);
-        map.children.get('d').endsWith('example/foo/d').should.be.ok;
-    });
-
-    it('should map directory keys', async () => {
-        const map = directory.mapDirectoryKeys(key => `direcotry:${key}`);
-        map.should.have.property('children').which.is.an.instanceof(Map);
-        map.children.size.should.be.exactly(4);
-        map.children.has('d').should.not.be.ok;
-        map.children.has('direcotry:d').should.be.ok;
-        map.children.get('direcotry:d').should.be.an.instanceof(DirectoryFiles);
-    });
-
-    it('should iterate through each directory', async () => {
-        const paths = [];
-        directory.eachDirectory(path => paths.push(path));
-        paths.length.should.be.exactly(1);
-    });
-
-    it('should remove directory', async () => {
-        const map = directory.filterDirectory(() => false);
-        map.should.have.property('children').which.is.an.instanceof(Map);
-        map.children.size.should.be.exactly(3);
-        map.children.has('d').should.not.be.ok;
-    });
-
-    it('should keep directory', async () => {
-        const map = directory.filterDirectory(() => true);
-        map.should.have.property('children').which.is.an.instanceof(Map);
-        map.children.size.should.be.exactly(4);
-        map.children.has('d').should.be.ok;
-    });
+    
 });
 
-describe('load wrong file', () => {
-    it('should throw an error', async () => {
-        let error = {};
-        try {
-            const directory = new DirectoryFiles();
-            await directory.load('../example/foo222');
-        }
-        catch (e) {
-            error = e;
-        }
-        error.should.be.an.instanceof(Error);
+
+describe('special cases', () => {
+
+    it('should be ok newing a descriptor on an empty directory', async () => {
+        const descriptor = new Descriptor('empty');
+        await descriptor.ready();
+        descriptor.stats.isDirectory().should.be.exactly(true);
+        descriptor.should.have.property('files');
+        descriptor.files.should.be.an.instanceof(Object);
+        Object.keys(descriptor.files).length.should.be.exactly(0);
     });
+
+    it('should throw newing a descriptor on a none-existing file', async () => {
+        const descriptor = new Descriptor('not-exist');
+        const error = (await misc.async.catchError(descriptor.ready())) || {};
+        error.should.be.instanceOf(Error);
+    });
+
+    it('should be ok calling ready twice', async () => {
+        const descriptor = new Descriptor('directory');
+        await descriptor.ready();
+        await descriptor.ready();
+        await descriptor._stat();
+        await descriptor._load();
+    });
+    
 });

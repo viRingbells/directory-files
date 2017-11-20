@@ -1,210 +1,103 @@
 /**
- * This module is supposed to scan all files under a certain directory
- * and provides iterate interface to handle these files
+ * The directory loader
  **/
 'use strict';
 
-const assert    = require('assert');
-const clone     = require('clone');
-const debug     = require('debug')('directoryfiles.index');
-const fs        = require('fs');
-const misc      = require('vi-misc');
-const path      = require('path');
+const debug   = require('debug')('directoryfiles.Descriptor');
+const fs      = require('fs');
+const misc    = require('vi-misc');
+const path    = require('path');
 
-debug('promisify native apis');
-misc.promisify.all(fs);
+misc.async.all(fs);
 
-class DirectoryFiles {
+
+class Descriptor {
 
     /**
-     * Scan and record all files paths under a certain directory
+     * Construct, init path
      **/
-    async load(path = '') {
-        debug('load directory');
-        await this._initialize(path);
-        const files = await fs.readdirAsync(this.path);
-        await this._loadFiles(files);
+    constructor(descriptor_path, parent_directory_path = null) {
+        descriptor_path = parent_directory_path == null ? descriptor_path :
+            path.join(parent_directory_path, descriptor_path);
+        this.path = misc.path.absolute(descriptor_path);
+        this._rel_path = path.relative(misc.path.root, this.path);
+        this.stats = null;
+        debug(`constructed as [${this._rel_path}]`);
     }
 
     /**
-     * Initialize all properties
+     * Get ready for further uses
      **/
-    async _initialize(path) {
-        debug('initialize');
-        assert('string' === typeof path, `Param 'path' must be a string, ${typeof path} given`);
-        this.path = misc.path.absolute(path);
-        const stat = await fs.statAsync(this.path);
-        assert(stat.isDirectory(), `${typeof this.path} should be a directory path`);
-        this.children = new Map();
+    async ready() {
+        await this._stat();
+        await this._load();
+        debug(`[${this._rel_path}] getting ready`);
     }
 
     /**
-     * Load files under the directory
+     * Check the stat
      **/
-    async _loadFiles(files) {
-        debug('load files');
-        const loadList = [];
-        for (let file of files) {
-            loadList.push((async (file) => {
-                const filePath = path.join(this.path, file);
-                const stat = await fs.statAsync(filePath);
-                if (stat.isDirectory()) {
-                    await this._loadDirectory(file);
-                    return;
-                }
-                debug(`load file ${filePath}`);
-                assert(!this.children.has(file), `Duplicated file/directory name ${file} for file ${file}`);
-                this.children.set(file, filePath);
-            })(file));
+    async _stat() {
+        if (this.stats === null) {
+            this.stats = await fs.statAsync(this.path);
+            debug(`[${this._rel_path}] stats OK`);
         }
-        await Promise.all(loadList);
-        debug('load files done');
+        return this;
     }
 
     /**
-     * Load a directory under the directory
+     * Load the file content / directory tree
      **/
-    async _loadDirectory(directoryName) {
-        assert(!this.children.has(directoryName), `Duplicated file/directory name for directory ${directoryName}`);
-        const directoryPath = path.join(this.path, directoryName);
-        debug(`load directory ${directoryPath}`);
-        const result = new DirectoryFiles();
-        await result.load(directoryPath);
-        this.children.set(directoryName, result);
+    async _load() {
+        debug(`[${this._rel_path}] loading`);
+        if (this.stats.isDirectory()) {
+            debug(`[${this._rel_path}] loading as DIRECTORY`);
+            await this.loadDirectory();
+        }
+        else {
+            debug(`[${this._rel_path}] loading as FILE`);
+            await this.loadFile();
+        }
+        return this;
     }
 
     /**
-     * Transform into a pure object
+     * Load file content
      **/
-    toObject() {
+    async loadFile() {
+        this.content = this.path;
+        return this;
+    }
+
+    /**
+     * Load directory
+     **/
+    async loadDirectory() {
+        const file_list = await fs.readdirAsync(this.path);
+        this.files = {};
+        for (const file_path of file_list) {
+            const sub_file = new Descriptor(file_path, this.path);
+            await sub_file.ready();
+            this.files[file_path] = sub_file;
+        }
+        return this;
+    }
+
+    /**
+     * Extract the directory/files into a tree in objects
+     **/
+    get tree() {
+        debug(`[${this._rel_path}] to tree`);
+        if (!this.stats.isDirectory()) {
+            return this.path;
+        }
         const object = {};
-        for (const key of this.children.keys()) {
-            const value = this.children.get(key);
-            object[key] = value instanceof DirectoryFiles ? value.toObject() : value;
+        for (const name in this.files) {
+            object[name] = this.files[name].tree;
         }
         return object;
     }
-
-    /**
-     * iterate an action on each of the files
-     **/
-    iterate(handler) {
-        assert(handler instanceof Function, 'Iterate handler must be a Function');
-        const subject = clone(this);
-        const keys = subject.children.keys();
-        const children = new Map();
-        for (const key of keys) {
-            const value = subject.children.get(key);
-            let result = handler(value, key);
-            result = Object.assign({}, result);
-
-            if (!result.hasOwnProperty('key')) {
-                continue;
-            }
-            assert(!children.has(result.key), `Duplicated key ${result.key} on directory ${subject.path}`);
-
-            if (result.value instanceof DirectoryFiles) {
-                result.value = result.value.iterate(handler);
-            }
-
-            children.set(result.key, result.value);
-        }
-        subject.children = children;
-        return subject;
-    }
-
-    iterateWith(type, handler) {
-        debug('iterate directory');
-        return this.iterate((value, key) => {
-            if ((value instanceof DirectoryFiles) !== (type === 'directory')) {
-                return { key, value };
-            }
-            return handler(value, key);
-        });
-    }
-
-    /**
-     * Map the values with a certain parser
-     **/
-    map(handler) {
-        debug('map');
-        return this.iterateWith('value', (value, key) => {
-            value = handler(value, key);
-            return { key, value };
-        });
-    }
-
-    /**
-     * Map the keys with a certain parser
-     **/
-    mapKeys(handler) {
-        debug('map keys');
-        return this.iterateWith('value', (value, key) => {
-            key = handler(key, value);
-            return { key, value };
-        });
-    }
-
-    /**
-     * Map the directories
-     **/
-    mapDirectory(handler) {
-        debug('map directory');
-        return this.iterateWith('directory', (value, key) => {
-            value = handler(value, key);
-            return { key, value };
-        });
-    }
-
-    /**
-     * Map directory keys
-     **/
-    mapDirectoryKeys(handler) {
-        debug('map directory keys');
-        return this.iterateWith('directory', (value, key) => {
-            key = handler(key, value);
-            return { key, value };
-        });
-    }
-
-    /**
-     * Apply the handler to each value of this.children
-     **/
-    each(handler) {
-        debug('each');
-        return this.map((value, key) => {
-            handler(value, key);
-            return value;
-        });
-    }
-
-    eachDirectory(handler) {
-        debug('each directory');
-        return this.mapDirectory((value, key) => {
-            handler(value, key);
-            return value;
-        });
-    }
-
-    /**
-     * Filter the values with a condition
-     **/
-    filter(handler) {
-        debug('filter');
-        return this.iterateWith('value', (value, key) => {
-            return handler(value, key) === true ? { key, value } : {};
-        });
-    }
-
-    /**
-     * Filter the directories with a condition
-     **/
-    filterDirectory(handler) {
-        debug('filter directory');
-        return this.iterateWith('directory', (value, key) => {
-            return handler(value, key) === true ? { key, value } : {};
-        });
-    }
 }
 
-module.exports = DirectoryFiles;
+
+module.exports = Descriptor;

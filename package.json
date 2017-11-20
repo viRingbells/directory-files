@@ -1,14 +1,15 @@
 {
   "name": "directoryfiles",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "To find and process all files under a directory",
-  "main": "index.js",
+  "main": "src/directory.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint index.js example/**",
-    "pretest": "npm run lint && npm link && npm link directoryfiles",
+    "lint": "./node_modules/.bin/eslint index.js",
+    "test:clear-env": "npm unlink directoryfiles && npm unlink && npm install",
+    "test:prepare-env": "npm link && npm link directoryfiles",
+    "pretest": "npm run test:clear-env && npm run lint && npm run test:prepare-env",
     "test": "./node_modules/.bin/istanbul cover ./node_modules/.bin/_mocha -- --require should --recursive test",
-    "posttest": "npm unlink",
-    "debug": "node --inspect-brk=9229 example/index.js"
+    "posttest": "npm run test:clear-env"
   },
   "repository": {
     "type": "git",
@@ -27,14 +28,14 @@
   },
   "homepage": "https://github.com/viRingbells/directoryfiles#readme",
   "devDependencies": {
-    "eslint": "^3.17.1",
+    "eslint": "^3.19.0",
     "eslint-plugin-spellcheck": "0.0.8",
     "istanbul": "^1.1.0-alpha.1",
-    "mocha": "^3.2.0",
+    "mocha": "^3.5.3",
     "should": "^11.2.1"
   },
   "dependencies": {
-    "clone": "^2.1.1",
-    "vi-misc": "^1.8.0"
+    "debug": "^3.1.0",
+    "vi-misc": "^1.12.0"
   }
 }
